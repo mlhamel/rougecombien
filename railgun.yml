@@ -1,0 +1,14 @@
+# https://development.shopify.io/tools/dev/railgun/Railgun-Config
+name: rougecombien
+
+vm:
+  image:      /opt/dev/misc/railgun-images/default
+  ip_address: 192.168.64.82
+  memory:     2G
+  cores:      2
+
+volumes:
+  root:  '2G'
+
+services:
+  - nginx

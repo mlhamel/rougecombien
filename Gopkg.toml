@@ -1,0 +1,4 @@
+[[constraint]]
+    name = "github.com/mlhamel/rougecombien"
+    version = "0.0.1"
+    branch = "master"
