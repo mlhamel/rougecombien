@@ -2,6 +2,8 @@ package config
 
 import (
 	"os"
+	"path"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -56,4 +58,13 @@ func (c *Config) HTTPPort() int {
 // Logger returns the current configured logger
 func (c *Config) Logger() *zerolog.Logger {
 	return c.log
+}
+
+// ProjectPath returns the path for the current project
+func (c *Config) ProjectPath() string {
+	_, filename, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("error while trying to run runtime.Caller(1)")
+	}
+	return path.Dir(path.Dir(path.Dir(filename)))
 }

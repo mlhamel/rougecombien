@@ -30,6 +30,7 @@ func NewController(cfg *config.Config) *Controller {
 // Run is responsible for running the web server
 func (controller *Controller) Run(ctx context.Context) error {
 	hostname := fmt.Sprintf(":%d", controller.cfg.HTTPPort())
+	controller.cfg.Logger().Info().Int("port", controller.cfg.HTTPPort()).Msg("Listening and Serving")
 	return http.ListenAndServe(hostname, controller.router)
 }
 

@@ -14,6 +14,8 @@ up:
       name: Load dependencies
       met?: go mod tidy
       meet: go mod tidy
+server:
+  run: go run -race ./cmd/rougecombien dev
 commands:
   build: go build -o bin/rougecombien cmd/rougecombien/main.go
   lint: golangci-lint run
