@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/mlhamel/rougecombien/pkg/config"
+	"github.com/mlhamel/rougecombien/pkg/tasks"
 	"github.com/mlhamel/rougecombien/pkg/web"
 )
 
@@ -23,6 +24,7 @@ func main() {
 		Action: func(*cli.Context) error {
 			manager := runnable.Manager(nil)
 			manager.Add(web.NewController(cfg))
+			manager.Add(tasks.NewPubSub(cfg))
 			return manager.Build().Run(ctx)
 		},
 	}
