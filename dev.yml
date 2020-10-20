@@ -19,3 +19,4 @@ server:
 commands:
   build: go build -o bin/rougecombien cmd/rougecombien/main.go
   lint: golangci-lint run
+  run: go run -race ./cmd/rougecombien

@@ -7,11 +7,10 @@ import (
 	"path"
 
 	"cirello.io/runner/procfile"
-	"github.com/pior/runnable"
 	"github.com/urfave/cli"
 
 	"github.com/mlhamel/rougecombien/pkg/config"
-	"github.com/mlhamel/rougecombien/pkg/web"
+	"github.com/mlhamel/rougecombien/pkg/scraper"
 )
 
 func main() {
@@ -21,9 +20,11 @@ func main() {
 	app := cli.App{
 		Name: "rougecombien",
 		Action: func(*cli.Context) error {
-			manager := runnable.Manager(nil)
-			manager.Add(web.NewController(cfg))
-			return manager.Build().Run(ctx)
+			if err := scraper.NewScraper(cfg).Run(ctx); err != nil {
+				panic(err)
+			}
+
+			return nil
 		},
 	}
 
