@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/mlhamel/rougecombien/pkg/config"
+	"github.com/mlhamel/rougecombien/pkg/consumer"
 	"github.com/mlhamel/rougecombien/pkg/scraper"
 )
 
@@ -44,6 +45,15 @@ func main() {
 				cfg.Logger().Info().Str("workdir", runner.WorkDir).Str("profile", profile).Msg(fmt.Sprintf("Running"))
 				runner.BasePort = cfg.HTTPPort()
 				return runner.Start(ctx)
+			},
+		},
+		{
+			Name: "subscribe",
+			Action: func(c *cli.Context) error {
+				if err := consumer.New(cfg).Run(ctx); err != nil {
+					panic(err)
+				}
+				return nil
 			},
 		},
 	}

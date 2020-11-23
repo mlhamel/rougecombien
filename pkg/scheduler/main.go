@@ -23,9 +23,13 @@ func NewScheduler(cfg *config.Config) Scheduler {
 }
 
 func (s *Scheduler) Run(ctx context.Context) error {
-	periodic := running.Periodic(s.cfg, s.timeout, scraper.NewRiviereRouge(s.cfg))
+
+	manager := runnable.Manager(nil)
+	periodic := running.Periodic(s.cfg, s.timeout, scraper.NewScraper(s.cfg))
+
+	manager.Add(periodic)
 
 	return runnable.
-		Signal(periodic).
+		Signal(manager.Build()).
 		Run(ctx)
 }

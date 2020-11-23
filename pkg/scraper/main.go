@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mlhamel/rougecombien/pkg/config"
+	"github.com/mlhamel/rougecombien/pkg/gcloud"
 )
 
 const url = "https://www.cehq.gouv.qc.ca/suivihydro/fichier_donnees.asp?NoStation=040204"
@@ -25,11 +26,27 @@ type Result struct {
 	Outflow   float64
 }
 
+// Data return Result as an array of bytes
+func (r *Result) Data() []byte {
+	return []byte(fmt.Sprintf(
+		"scrapedAt:%d,takenAt:%d,outflow:%f",
+		r.ScrapedAt.Unix(),
+		r.TakenAt.Unix(),
+		r.Outflow,
+	))
+}
+
 func NewScraper(cfg *config.Config) *Scraper {
 	return &Scraper{cfg: cfg, client: &http.Client{}}
 }
 
 func (s *Scraper) Run(ctx context.Context) error {
+	emiter, err := gcloud.NewPubSubEmission(ctx, s.cfg)
+
+	if err != nil {
+		return err
+	}
+
 	response, err := s.client.Get(url)
 
 	if err != nil {
@@ -55,6 +72,14 @@ func (s *Scraper) Run(ctx context.Context) error {
 	}
 
 	for _, each := range data {
+		if strings.TrimSpace(each[0]) == "Date" {
+			continue
+		}
+
+		if strings.TrimSpace(each[0]) == "" {
+			continue
+		}
+
 		rawDate := fmt.Sprintf("%s %s", each[0], strings.TrimRight(each[1], "\\"))
 
 		takenAt, err := time.Parse("2006-01-02 15:04", rawDate)
@@ -83,6 +108,10 @@ func (s *Scraper) Run(ctx context.Context) error {
 			Time("TakenAt", record.TakenAt).
 			Float64("Outflow", record.Outflow).
 			Msg("Record parsed")
+
+		if err = emiter.Publish(ctx, s.cfg.TopicName(), record.Data()); err != nil {
+			return err
+		}
 	}
 
 	return nil

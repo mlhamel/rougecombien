@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"path"
 	"runtime"
@@ -10,6 +11,8 @@ import (
 	"github.com/DataDog/datadog-go/statsd"
 	"github.com/rs/zerolog"
 )
+
+var EnvtVarNotFoundError = errors.New("Missing environment variable")
 
 // Config is the main configuration structure
 type Config struct {
@@ -50,6 +53,14 @@ func GetEnv(key, fallback string) string {
 	return fallback
 }
 
+// RequireEnv returns the current `key` value or an error
+func RequireEnv(key string) (string, error) {
+	if value, ok := os.LookupEnv(key); ok {
+		return value, nil
+	}
+	return "", EnvtVarNotFoundError
+}
+
 // HTTPPort returns the port our http server should listen for
 func (c *Config) HTTPPort() int {
 	return c.httpPort
@@ -62,9 +73,19 @@ func (c *Config) Logger() *zerolog.Logger {
 
 // ProjectPath returns the path for the current project
 func (c *Config) ProjectPath() string {
-	_, filename, _, ok := runtime.Caller(1)
+	_, current, _, ok := runtime.Caller(1)
 	if !ok {
 		panic("error while trying to run runtime.Caller(1)")
 	}
-	return path.Dir(path.Dir(path.Dir(filename)))
+	return path.Dir(path.Dir(path.Dir(current)))
+}
+
+// GoogleCloudProject returns the name of the current gcloud project
+func (c *Config) GoogleCloudProject() string {
+	return GetEnv("GOOGLE_CLOUD_PROJECT", "rougecombien1")
+}
+
+// TopicName returns the name of Google Cloud PubSub topic
+func (c *Config) TopicName() string {
+	return "outflow-topic"
 }
